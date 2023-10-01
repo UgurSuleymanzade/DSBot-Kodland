@@ -15,6 +15,11 @@ client = discord.Client(intents=intents)
 async def on_ready():
     print(f'We have logged in as {client.user}')
 
+@client.event
+async def on_guild_join(member):
+    print("+1")
+    await member.send(f'Добро пожаловать {member}! Напиши !help чтобы узнать мои команды.')
+
 # Когда бот будет получать сообщение, он будет отправлять в этот же канал какие-то сообщения!
 @client.event
 async def on_message(message):
@@ -32,7 +37,5 @@ async def on_message(message):
         await message.channel.send(random_number(1,10))
     elif message.content.startswith("!help"):
         await message.channel.send("Доступные команды:\n!ping - Проверка бота на работоспособность\n!password - Регенерация пароля\n!emodji - Регенерация эмодзи\n!coin - Мини Игра `Орёл или Решка`\n!random - Рандомное число от 1 до 10")
-    else:
-        await message.channel.send("Я не понимаю такую команду!")
 
 client.run(settings["TOKEN"])
