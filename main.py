@@ -1,41 +1,59 @@
 import discord
+import os
 import random
-from bot_logic import *
+import requests
+from discord.ext import commands
 from settings import settings
 
-
-# Переменная intents - хранит привилегии бота
 intents = discord.Intents.default()
-# Включаем привелегию на чтение сообщений
 intents.message_content = True
-# Создаем бота в переменной client и передаем все привелегии
-client = discord.Client(intents=intents)
 
-@client.event
+bot = commands.Bot(command_prefix='!', intents=intents)
+
+def get_duck_image_url():    
+    url = 'https://random-d.uk/api/random'
+    res = requests.get(url)
+    data = res.json()
+    return data['url']
+
+def get_dog_image_url():    
+    url = 'https://random.dog/woof.json'
+    res = requests.get(url)
+    data = res.json()
+    return data['url']
+
+@bot.event
 async def on_ready():
-    print(f'We have logged in as {client.user}')
+    print(f'We have logged in as {bot.user}')
 
-@client.event
-async def on_guild_join(member):
-    print("+1")
-    await member.send(f'Добро пожаловать {member}! Напиши !help чтобы узнать мои команды.')
+@bot.command()
+async def hello(ctx):
+    await ctx.send(f'Привет! Я бот {bot.user}!')
 
-# Когда бот будет получать сообщение, он будет отправлять в этот же канал какие-то сообщения!
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-    if message.content.startswith('!ping'):
-        await message.channel.send('Привет!')
-    elif message.content.startswith('!password'):
-        await message.channel.send(gen_pass(25))
-    elif message.content.startswith('!emodji'):
-        await message.channel.send(gen_emodji())
-    elif message.content.startswith('!coin'):
-        await message.channel.send(flip_coin())
-    elif message.content.startswith("!random"):
-        await message.channel.send(random_number(1,10))
-    elif message.content.startswith("!help"):
-        await message.channel.send("Доступные команды:\n!ping - Проверка бота на работоспособность\n!password - Регенерация пароля\n!emodji - Регенерация эмодзи\n!coin - Мини Игра `Орёл или Решка`\n!random - Рандомное число от 1 до 10")
+@bot.command()
+async def heh(ctx, count_heh = 5):
+    await ctx.send("he" * count_heh)
 
-client.run(settings["TOKEN"])
+
+@bot.command('duck')
+async def duck(ctx):
+    '''По команде duck вызывает функцию get_duck_image_url'''
+    image_url = get_duck_image_url()
+    await ctx.send(image_url)
+
+@bot.command('dog')
+async def dog(ctx):
+    '''По команде dog вызывает функцию get_dog_image_url'''
+    image_url = get_dog_image_url()
+    await ctx.send(image_url)
+
+@bot.command()
+async def mem(ctx):
+    img_name = random.choice(os.listdir("images"))
+    with open(f'images/{img_name}', 'rb') as f:
+        # В переменную кладем файл, который преобразуется в файл библиотеки Discord!
+        picture = discord.File(f)
+   # Можем передавать файл как параметр!
+    await ctx.send(file=picture)
+
+bot.run(settings["TOKEN"])
