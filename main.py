@@ -22,6 +22,12 @@ def get_dog_image_url():
     data = res.json()
     return data['url']
 
+def get_fox_image_url():    
+    url = 'https://randomfox.ca/floof/'
+    res = requests.get(url)
+    data = res.json()
+    return data['image']
+
 @bot.event
 async def on_ready():
     print(f'We have logged in as {bot.user}')
@@ -45,6 +51,12 @@ async def duck(ctx):
 async def dog(ctx):
     '''По команде dog вызывает функцию get_dog_image_url'''
     image_url = get_dog_image_url()
+    await ctx.send(image_url)
+
+@bot.command('fox')
+async def fox(ctx):
+    '''По команде fox вызывает функцию get_fox_image_url'''
+    image_url = get_fox_image_url()
     await ctx.send(image_url)
 
 @bot.command()
